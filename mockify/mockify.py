@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3.4 -B
 # Marco Molteni, February 2015
 
 """
@@ -20,6 +20,14 @@ import os.path
 import textwrap
 
 from pycparser import c_parser, c_ast
+
+
+class MockError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 def main(args):
@@ -53,8 +61,11 @@ def write_header(file, header, include):
 def add_mock_function(file, prototype):
     print("Adding mock function")
     # TODO: parse file to see if mock function is already there...
-    mock_function = generate_mock_boilerplate(prototype)
-    file.write("\n" + mock_function + "\n")
+    try:
+        mock_function = generate_mock_boilerplate(prototype)
+        file.write("\n" + mock_function + "\n")
+    except MockError as e:
+        print("Error: " + e.value)
 
 
 def generate_mock_boilerplate(prototype):
@@ -65,10 +76,10 @@ def generate_mock_boilerplate(prototype):
         node = parser.parse(prototype)
     except c_parser.ParseError:
         e = sys.exc_info()[1]
-        return "Parse error:" + str(e)
+        raise MockError("Parse error:" + str(e))
     if (not isinstance(node, c_ast.FileAST)
             or not isinstance(node.ext[-1], c_ast.Decl)):
-        return "Not a valid declaration"
+        raise MockError("Not a valid declaration")
     decl = node.ext[-1]
     print("decl:"); decl.show(); print("")
 
@@ -79,7 +90,7 @@ def generate_mock_boilerplate(prototype):
     print("storage: " + storage + "\n")
 
     if not type(decl.type) == c_ast.FuncDecl:
-        return "Error, not a function"
+        raise MockError("Error, not a function declaration")
 
     func_decl = decl.type
     function_name = decl.name
