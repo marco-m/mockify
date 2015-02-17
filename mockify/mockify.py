@@ -17,6 +17,9 @@ extern "C" {
 
 import sys
 import os.path
+import textwrap
+
+from pycparser import c_parser, c_ast
 
 
 def main(args):
@@ -55,16 +58,57 @@ def add_mock_function(file, prototype):
 
 
 def generate_mock_boilerplate(prototype):
-    # Two cases: returns void or returns something.
-    # If it returns something, add also boilerplate for test-injected value.
-    #
+    # Thanks to cdecl.py from pycparser
+
+    parser = c_parser.CParser()
+    try:
+        node = parser.parse(prototype)
+    except c_parser.ParseError:
+        e = sys.exc_info()[1]
+        return "Parse error:" + str(e)
+    if (not isinstance(node, c_ast.FileAST)
+            or not isinstance(node.ext[-1], c_ast.Decl)):
+        return "Not a valid declaration"
+    decl = node.ext[-1]
+    print("decl:"); decl.show(); print("")
+
+    # storage is the optional "static" in "static void f();"
+    storage = ''
+    if decl.storage:
+        storage = ' '.join(decl.storage)
+    print("storage: " + storage + "\n")
+
+    if not type(decl.type) == c_ast.FuncDecl:
+        return "Error, not a function"
+
+    func_decl = decl.type
+    function_name = decl.name
+    print("function_name: " + function_name + "\n")
+
+    # func_decl.args : function arguments or None
+    # func_decl.type : function type
+    #func_decl.args.show()
+    func_decl.type.show(); print("")
+
     # Simplest possible:
     # void f(); =>
     # void f() {
     #     mock().actualCall("f");
     # }
+
+    if func_decl.type.type.names[0] == 'void':
+        mock = textwrap.dedent(
+            """
+            {return_type} {function}({args}) {{
+                mock().actualCall("{function}");
+            }}
+            """.format(return_type=func_decl.type.type.names[0],
+                       function=function_name,
+                       args="")).strip("\n")
+        print(mock)
+        return mock
     #
-    # "withParameters" can only use int, double, const char* or void*
+    # "withParameters" can only use int, double, const char* or const void*
     # void f(int i, const char* p); =>
     # void f(int i, const char* p) {
     #     mock().actualCall("f")
@@ -90,17 +134,7 @@ def generate_mock_boilerplate(prototype):
     #     return WRITEME;
     # }
     #
-    # or maybe (check if it works):
-    # int function () {
-    #     mock().actualCall("function");
-    #     return mock().returnIntValueOrDefault(WRITEME);
-    # }
     #
-    # int f(int i, const char* p);
-    # char* f(int i, char *p);
-    # char * f(int i, char * p);
-    #
-    return "WRITEME"
 
 
 if __name__ == "__main__":

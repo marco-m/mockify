@@ -20,6 +20,10 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void f();")
 
+    # def test_GracefullyHandleParseErrors(self):
+    #     # Missing ``;`` at end of ``void f()`` is a syntax error
+    #     self.assertEqual("ciao",
+    #                      generate_mock_boilerplate("void f()"))
 
 if __name__ == '__main__':
     unittest.main()
