@@ -49,6 +49,7 @@ def main(args):
         mock_file = open(mock_filename, "w")
         write_header(mock_file, FILE_HEADER, include_filename)
     add_mock_function(mock_file, mock_prototype)
+    mock_file.write("\n")
     mock_file.close()
 
 

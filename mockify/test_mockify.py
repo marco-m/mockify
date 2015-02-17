@@ -33,6 +33,18 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void f();")
 
+    def test_IntFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            int f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().intReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "int f();")
 
 
 if __name__ == '__main__':
