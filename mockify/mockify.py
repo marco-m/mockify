@@ -87,7 +87,8 @@ def generate_mock_boilerplate(prototype):
     storage = ''
     if decl.storage:
         storage = ' '.join(decl.storage)
-    print("storage: " + storage + "\n")
+        print("storage: " + storage + "\n")
+        raise MockError("Cannot mock a static function")
 
     if not type(decl.type) == c_ast.FuncDecl:
         raise MockError("Error, not a function declaration")

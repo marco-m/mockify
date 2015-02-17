@@ -11,7 +11,20 @@ class BoilerPlateGeneration(unittest.TestCase):
         self.assertEqual(textwrap.dedent(mock_function).strip("\n"),
                          generate_mock_boilerplate(prototype))
 
-    def test_SimplestPossible(self):
+    def test_IncompleteInput(self):
+        # Missing ``;`` at end of ``void f()`` is incomplete...
+        self.assertRaises(MockError, generate_mock_boilerplate, "void f()")
+
+    def test_RefuseStaticFunctions(self):
+        self.assertRaises(MockError, generate_mock_boilerplate, "static void f();")
+
+    def test_DeclarationsThatAreNotFunctions(self):
+        self.assertRaises(MockError, generate_mock_boilerplate, "int i;")
+
+    def test_ParseError(self):
+        self.assertRaises(MockError, generate_mock_boilerplate, "foo")
+
+    def test_VoidFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
             """
             void f() {
@@ -20,12 +33,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void f();")
 
-    def test_GracefullyHandleParseErrors(self):
-        # Missing ``;`` at end of ``void f()`` is a syntax error
-        self.assertRaises(MockError, generate_mock_boilerplate, "void f()")
-
-    def test_GracefullyHandleDeclarationsThatAreNotFunctions(self):
-        self.assertRaises(MockError, generate_mock_boilerplate, "int i;")
 
 
 if __name__ == '__main__':
