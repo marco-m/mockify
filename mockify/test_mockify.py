@@ -26,14 +26,14 @@ class BoilerPlateGeneration(unittest.TestCase):
         self.assertEqual(textwrap.dedent(mock_function).strip("\n"),
                          generate_mock_boilerplate(prototype))
 
-    def test_IncompleteInput(self):
+    def test_RefuseIncompleteInput(self):
         # Missing ``;`` at end of ``void f()`` is incomplete...
         self.assertRaises(MockError, generate_mock_boilerplate, "void f()")
 
     def test_RefuseStaticFunctions(self):
         self.assertRaises(MockError, generate_mock_boilerplate, "static void f();")
 
-    def test_DeclarationsThatAreNotFunctions(self):
+    def test_RefuseDeclarationsThatAreNotFunctions(self):
         self.assertRaises(MockError, generate_mock_boilerplate, "int i;")
 
     def test_ParseError(self):
@@ -61,6 +61,31 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "int f();")
 
+    # def test_UnsignedIntFunctionZeroArguments(self):
+    #     self.ExpectedMockFromProto(
+    #         """
+    #         unsigned int f() {
+    #             mock().actualCall("f");
+    #             if mock().hasReturnValue() {
+    #                 return mock().unsignedIntReturnValue();
+    #             }
+    #             return WRITEME;
+    #         }
+    #         """,
+    #         "unsigned int f();")
+
+    # def test_ConstCharPtrFunctionZeroArguments(self):
+    #     self.ExpectedMockFromProto(
+    #         """
+    #         const char* f() {
+    #             mock().actualCall("f");
+    #             if mock().hasReturnValue() {
+    #                 return mock().stringReturnValue();
+    #             }
+    #             return WRITEME;
+    #         }
+    #         """,
+    #         "const char* f();")
 
 if __name__ == '__main__':
     unittest.main()

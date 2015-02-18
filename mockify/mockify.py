@@ -87,18 +87,17 @@ def generate_mock_boilerplate(prototype):
 
     parser = c_parser.CParser()
     try:
-        node = parser.parse(prototype)
+        ast = parser.parse(prototype)
     except c_parser.ParseError:
         e = sys.exc_info()[1]
         raise MockError("Parse error:" + str(e))
-    if (not isinstance(node, c_ast.FileAST)
-            or not isinstance(node.ext[-1], c_ast.Decl)):
+    if (not isinstance(ast, c_ast.FileAST)
+            or not isinstance(ast.ext[-1], c_ast.Decl)):
         raise MockError("Not a valid declaration")
-    decl = node.ext[-1]
+    decl = ast.ext[-1]
     print("decl:"); decl.show(); print("")
 
     # storage is the optional "static" in "static void f();"
-    storage = ''
     if decl.storage:
         storage = ' '.join(decl.storage)
         print("storage: " + storage + "\n")
@@ -109,30 +108,36 @@ def generate_mock_boilerplate(prototype):
 
     func_decl = decl.type
     function_name = decl.name
-    print("function_name: " + function_name + "\n")
+    function_type = func_decl.type.type
 
-    # func_decl.args : function arguments or None
-    # func_decl.type : function type
-    #func_decl.args.show()
-    func_decl.type.show(); print("")
+    if func_decl.args:
+        func_decl.args.show()
+    function_type.show(); print("")
 
-    # Simplest possible:
-    # void f(); =>
-    # void f() {
-    #     mock().actualCall("f");
-    # }
+    function_line =\
+        '{return_type} {function}({args}) {{\n'.format(
+            return_type=function_type.names[0],
+            function=function_name,
+            args="")
 
-    if func_decl.type.type.names[0] == 'void':
-        mock = textwrap.dedent(
-            """
-            {return_type} {function}({args}) {{
-                mock().actualCall("{function}");
-            }}
-            """.format(return_type=func_decl.type.type.names[0],
-                       function=function_name,
-                       args="")).strip("\n")
-        print(mock)
-        return mock
+    actual_call_line =\
+        '    mock().actualCall("{function}");\n'.format(
+            function=function_name)
+
+    if function_type.names[0] == 'void':
+        has_return_value_lines = ''
+    elif function_type.names[0] == 'int':
+        has_return_value_lines = \
+            '    if mock().hasReturnValue() {\n' \
+            '        return mock().intReturnValue();\n' \
+            '    }\n' \
+            '    return WRITEME;\n'
+    else:
+        return
+
+    mock = function_line + actual_call_line + has_return_value_lines + '}'
+    return mock
+
     #
     # "withParameters" can only use int, double, const char* or const void*
     # void f(int i, const char* p); =>
