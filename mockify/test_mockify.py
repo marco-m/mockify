@@ -61,18 +61,31 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "int f();")
 
-    # def test_UnsignedIntFunctionZeroArguments(self):
-    #     self.ExpectedMockFromProto(
-    #         """
-    #         unsigned int f() {
-    #             mock().actualCall("f");
-    #             if mock().hasReturnValue() {
-    #                 return mock().unsignedIntReturnValue();
-    #             }
-    #             return WRITEME;
-    #         }
-    #         """,
-    #         "unsigned int f();")
+    def test_DoubleFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            double f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().doubleReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "double f();")
+
+    def test_UnsignedIntFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            unsigned int f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().unsignedIntReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "unsigned int f();")
 
     # def test_ConstCharPtrFunctionZeroArguments(self):
     #     self.ExpectedMockFromProto(
