@@ -35,12 +35,12 @@ extern "C" {
 
 '''
 
-VOID_MOCK_DEFINITION = '''
+VOID_MOCK = '''
 {return_type} {function}({args}) {{
     mock().actualCall("{function}");
 }}'''.lstrip("\n")
 
-NON_VOID_MOCK_DEFINITION = '''
+NON_VOID_MOCK = '''
 {return_type} {function}({args}) {{
     mock().actualCall("{function}");
     if mock().hasReturnValue() {{
@@ -133,18 +133,18 @@ def generate_mock_boilerplate(prototype):
     function_type.show(); print("")
 
     if type_name == 'void':
-        mock = VOID_MOCK_DEFINITION.format(
+        mock = VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
             args="")
     elif type_name in ['int', 'double']:
-        mock = NON_VOID_MOCK_DEFINITION.format(
+        mock = NON_VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
             args="",
             type_name=type_name)
     elif type_name == 'unsigned int':
-        mock = NON_VOID_MOCK_DEFINITION.format(
+        mock = NON_VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
             args="",
