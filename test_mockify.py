@@ -87,6 +87,19 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "unsigned int f();")
 
+    def test_VoidPtrFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            void* f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().pointerReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "void* f();")
+
     # def test_ConstCharPtrFunctionZeroArguments(self):
     #     self.ExpectedMockFromProto(
     #         """

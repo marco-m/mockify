@@ -41,7 +41,7 @@ VOID_MOCK = '''
 }}'''.lstrip("\n")
 
 NON_VOID_MOCK = '''
-{return_type} {function}({args}) {{
+{return_type}{pointer} {function}({args}) {{
     mock().actualCall("{function}");
     if mock().hasReturnValue() {{
         return mock().{type_name}ReturnValue();
@@ -112,40 +112,69 @@ def generate_mock_boilerplate(prototype):
     decl = ast.ext[-1]
     print("decl:"); decl.show(); print("")
 
+    if not type(decl.type) == c_ast.FuncDecl:
+        raise MockError("Error, not a function declaration")
+
     # storage is, for example, "static" in "static void f();"
     if decl.storage:
         storage = ' '.join(decl.storage)
         print("storage: " + storage + "\n")
         raise MockError("Cannot mock a static function")
 
-    if not type(decl.type) == c_ast.FuncDecl:
-        raise MockError("Error, not a function declaration")
-
     func_decl = decl.type
     function_name = decl.name
-    function_type = func_decl.type.type
+
+    pointer = ''
+    if type(func_decl.type.type) == c_ast.TypeDecl:
+        # void* f(); =>
+        # Decl: f, [], [], []
+        #   FuncDecl:
+        #     PtrDecl: []
+        #       TypeDecl: f, []
+        #         IdentifierType: ['void']
+        pointer = '*'
+        function_type = func_decl.type.type.type
+    elif type(func_decl.type.type) == c_ast.IdentifierType:
+        # void f(); =>
+        # Decl: f, [], [], []
+        #   FuncDecl:
+        #     TypeDecl: f, []
+        #       IdentifierType: ['void']
+        function_type = func_decl.type.type
+
+    # e.g.: "int"
     type_name = function_type.names[0]
     if len(function_type.names) > 1:
+        # e.g.: "unsigned int"
         type_name += " " + function_type.names[1]
 
     if func_decl.args:
         func_decl.args.show()
     function_type.show(); print("")
 
-    if type_name == 'void':
+    if type_name == 'void' and not pointer:
         mock = VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
             args="")
+    elif type_name == 'void' and pointer:
+        mock = NON_VOID_MOCK.format(
+            return_type=type_name,
+            pointer=pointer,
+            function=function_name,
+            args="",
+            type_name='pointer')
     elif type_name in ['int', 'double']:
         mock = NON_VOID_MOCK.format(
             return_type=type_name,
+            pointer=pointer,
             function=function_name,
             args="",
             type_name=type_name)
     elif type_name == 'unsigned int':
         mock = NON_VOID_MOCK.format(
             return_type=type_name,
+            pointer=pointer,
             function=function_name,
             args="",
             type_name='unsignedInt')
