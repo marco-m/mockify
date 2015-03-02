@@ -41,7 +41,7 @@ VOID_MOCK = '''
 }}'''.lstrip("\n")
 
 NON_VOID_MOCK = '''
-{return_type}{pointer} {function}({args}) {{
+{qualifiers}{return_type}{pointer} {function}({args}) {{
     mock().actualCall("{function}");
     if mock().hasReturnValue() {{
         return mock().{type_name}ReturnValue();
@@ -106,13 +106,12 @@ def generate_mock_boilerplate(prototype):
     except c_parser.ParseError:
         e = sys.exc_info()[1]
         raise MockError("Parse error:" + str(e))
-    if (not isinstance(ast, c_ast.FileAST)
-            or not isinstance(ast.ext[-1], c_ast.Decl)):
-        raise MockError("Not a valid declaration")
     decl = ast.ext[-1]
-    print("decl:"); decl.show(); print("")
+    if not isinstance(decl, c_ast.Decl):
+        raise MockError("Not a valid declaration")
+    decl.show(); print("")
 
-    if not type(decl.type) == c_ast.FuncDecl:
+    if not isinstance(decl.type, c_ast.FuncDecl):
         raise MockError("Error, not a function declaration")
 
     # storage is, for example, "static" in "static void f();"
@@ -125,22 +124,27 @@ def generate_mock_boilerplate(prototype):
     function_name = decl.name
 
     pointer = ''
-    if type(func_decl.type.type) == c_ast.TypeDecl:
+    if isinstance(func_decl.type, c_ast.PtrDecl):
         # void* f(); =>
         # Decl: f, [], [], []
         #   FuncDecl:
         #     PtrDecl: []
         #       TypeDecl: f, []
         #         IdentifierType: ['void']
+        type_decl = func_decl.type.type
         pointer = '*'
-        function_type = func_decl.type.type.type
-    elif type(func_decl.type.type) == c_ast.IdentifierType:
+    elif isinstance(func_decl.type, c_ast.TypeDecl):
         # void f(); =>
         # Decl: f, [], [], []
         #   FuncDecl:
         #     TypeDecl: f, []
         #       IdentifierType: ['void']
-        function_type = func_decl.type.type
+        type_decl = func_decl.type
+
+    function_type = type_decl.type
+    qualifiers = ''  # e.g.: "const"
+    if len(type_decl.quals) > 0:
+        qualifiers = type_decl.quals[0] + ' '
 
     # e.g.: "int"
     type_name = function_type.names[0]
@@ -150,7 +154,6 @@ def generate_mock_boilerplate(prototype):
 
     if func_decl.args:
         func_decl.args.show()
-    function_type.show(); print("")
 
     if type_name == 'void' and not pointer:
         mock = VOID_MOCK.format(
@@ -159,6 +162,7 @@ def generate_mock_boilerplate(prototype):
             args="")
     elif type_name == 'void' and pointer:
         mock = NON_VOID_MOCK.format(
+            qualifiers=qualifiers,
             return_type=type_name,
             pointer=pointer,
             function=function_name,
@@ -166,6 +170,7 @@ def generate_mock_boilerplate(prototype):
             type_name='pointer')
     elif type_name in ['int', 'double']:
         mock = NON_VOID_MOCK.format(
+            qualifiers=qualifiers,
             return_type=type_name,
             pointer=pointer,
             function=function_name,
@@ -173,13 +178,23 @@ def generate_mock_boilerplate(prototype):
             type_name=type_name)
     elif type_name == 'unsigned int':
         mock = NON_VOID_MOCK.format(
+            qualifiers=qualifiers,
             return_type=type_name,
             pointer=pointer,
             function=function_name,
             args="",
             type_name='unsignedInt')
+    elif type_name == 'char' and pointer:
+        mock = NON_VOID_MOCK.format(
+            qualifiers=qualifiers,
+            return_type=type_name,
+            pointer=pointer,
+            function=function_name,
+            args="",
+            type_name='string')
     else:
-        raise MockError("Internal error with: " + prototype)
+        raise MockError("Internal error with: {0} [{1}]".format(prototype,
+                                                                type_name))
 
     return mock
 
@@ -199,17 +214,6 @@ def generate_mock_boilerplate(prototype):
     #     mock().actualCall("foo").
     #         withOutputParameter("bar", bar);
     # }
-    #
-    # Return values:
-    #
-    # int function () {
-    #     mock().actualCall("function");
-    #     if (mock.hasxxx) {
-    #         return mock().intReturnValue();
-    #     }
-    #     return WRITEME;
-    # }
-    #
     #
 
 
