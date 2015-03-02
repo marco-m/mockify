@@ -113,5 +113,27 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "const char* f();")
 
+    # def test_VoidFunctionOneArgument(self):
+    #     self.ExpectedMockFromProto(
+    #         """
+    #         void f(int i) {
+    #             mock().actualCall("f")
+    #                 .withParameter("i", i);
+    #         }
+    #         """,
+    #         "void f(int i);")
+    #
+    # def test_VoidFunctionTwoArguments(self):
+    #     self.ExpectedMockFromProto(
+    #         """
+    #         void f(int i, int j) {
+    #             mock().actualCall("f")
+    #                 .withParameter("i", i)
+    #                 .withParameter("j", j);
+    #         }
+    #         """,
+    #         "void f(int i, int j);")
+
+
 if __name__ == '__main__':
     unittest.main()
