@@ -108,17 +108,16 @@ def generate_mock_boilerplate(prototype):
         raise MockError("Parse error:" + str(e))
     decl = ast.ext[-1]
     if not isinstance(decl, c_ast.Decl):
-        raise MockError("Not a valid declaration")
+        raise MockError("Not a valid declaration: " + prototype)
     decl.show(); print("")
 
     if not isinstance(decl.type, c_ast.FuncDecl):
-        raise MockError("Error, not a function declaration")
+        raise MockError("Not a function declaration: " + prototype)
 
     # storage is, for example, "static" in "static void f();"
     if decl.storage:
         storage = ' '.join(decl.storage)
-        print("storage: " + storage + "\n")
-        raise MockError("Cannot mock a static function")
+        raise MockError("Cannot mock a function with storage: " + storage)
 
     func_decl = decl.type
     function_name = decl.name
@@ -128,7 +127,7 @@ def generate_mock_boilerplate(prototype):
         # void* f(); =>
         # Decl: f, [], [], []
         #   FuncDecl:
-        #     PtrDecl: []
+        #     PtrDecl: []                   <== here
         #       TypeDecl: f, []
         #         IdentifierType: ['void']
         type_decl = func_decl.type.type
@@ -137,20 +136,22 @@ def generate_mock_boilerplate(prototype):
         # void f(); =>
         # Decl: f, [], [], []
         #   FuncDecl:
-        #     TypeDecl: f, []
+        #     TypeDecl: f, []               <== here
         #       IdentifierType: ['void']
         type_decl = func_decl.type
+    else:
+        raise MockError("Internal error parsing: " + prototype)
 
-    function_type = type_decl.type
-    qualifiers = ''  # e.g.: "const"
+    identifier_type = type_decl.type
+    qualifiers = ''  # e.g.: "const" in "const char* f()"
     if len(type_decl.quals) > 0:
         qualifiers = type_decl.quals[0] + ' '
 
-    # e.g.: "int"
-    type_name = function_type.names[0]
-    if len(function_type.names) > 1:
-        # e.g.: "unsigned int"
-        type_name += " " + function_type.names[1]
+    # e.g.: "int" in "int f()"
+    type_name = identifier_type.names[0]
+    if len(identifier_type.names) > 1:
+        # e.g.: "unsigned int" in "unsigned int f()"
+        type_name += " " + identifier_type.names[1]
 
     if func_decl.args:
         func_decl.args.show()
@@ -193,12 +194,11 @@ def generate_mock_boilerplate(prototype):
             args="",
             type_name='string')
     else:
-        raise MockError("Internal error with: {0} [{1}]".format(prototype,
-                                                                type_name))
+        raise MockError("Internal error, cannot handle: {0} [{1}]".format(
+            prototype, type_name))
 
     return mock
 
-    #
     # "withParameters" can only use int, double, const char* or const void*
     # void f(int i, const char* p); =>
     # void f(int i, const char* p) {
@@ -214,7 +214,6 @@ def generate_mock_boilerplate(prototype):
     #     mock().actualCall("foo").
     #         withOutputParameter("bar", bar);
     # }
-    #
 
 
 if __name__ == "__main__":
