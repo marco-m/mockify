@@ -158,6 +158,7 @@ def generate_mock_boilerplate(prototype):
         func_decl.args.show()
 
     return_values = {
+        # All the return values supported by CppUMock.
         'int':               'intReturnValue()',
         'unsigned int':      'unsignedIntReturnValue()',
         'long int':          'longIntReturnValue()',

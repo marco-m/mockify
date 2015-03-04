@@ -100,7 +100,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void* f();")
 
-    @unittest.skip("FIXME")
     def test_ConstVoidPtrFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
             """
