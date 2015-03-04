@@ -113,7 +113,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "const void* f();")
 
-    @unittest.skip("FIXME")
     def test_CharPtrFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
             """

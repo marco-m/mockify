@@ -167,6 +167,9 @@ def generate_mock_boilerplate(prototype):
         'double':            'doubleReturnValue()',
         'void*':             'pointerReturnValue()',
         'const void*':       'constPointerReturnValue()',
+
+        # Synthetic case
+        'char*':             'pointerReturnValue()',
     }
 
     if type_name == 'void':
