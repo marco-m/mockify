@@ -52,19 +52,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "int f();")
 
-    def test_DoubleFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
-            """
-            double f() {
-                mock().actualCall("f");
-                if mock().hasReturnValue() {
-                    return mock().doubleReturnValue();
-                }
-                return WRITEME;
-            }
-            """,
-            "double f();")
-
     def test_UnsignedIntFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
             """
@@ -77,6 +64,45 @@ class BoilerPlateGeneration(unittest.TestCase):
             }
             """,
             "unsigned int f();")
+
+    def test_LongIntFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            long int f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().longIntReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "long int f();")
+
+    def test_UnsignedLongIntFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            unsigned long int f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().unsignedLongIntReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "unsigned long int f();")
+
+    def test_DoubleFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            double f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().doubleReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "double f();")
 
     def test_VoidFunctionZeroArguments(self):
         self.ExpectedMockFromProto(

@@ -144,10 +144,7 @@ def generate_mock_boilerplate(prototype):
     identifier_type = type_decl.type
 
     # e.g.: "int" in "int f()"
-    type_name = identifier_type.names[0]
-    if len(identifier_type.names) > 1:
-        # e.g.: "unsigned int" in "unsigned int f()"
-        type_name += " " + identifier_type.names[1]
+    type_name = ' '.join(identifier_type.names)
     if pointer:
         type_name += '*'
     # e.g.: "const" in "const char* f()"

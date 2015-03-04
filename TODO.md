@@ -1,10 +1,6 @@
 THOUGHTS
 --------
 
-- Code is rather ugly.
-    - Maybe enumerate the various return types instead?
-    - Maybe remove the templates and go back to the initial approach
-    of writing the C++ code incrementally
 
 
 TODO
