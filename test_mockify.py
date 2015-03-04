@@ -91,6 +91,19 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "unsigned long int f();")
 
+    def test_ConstCharPtrFunctionZeroArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            const char* f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().stringReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "const char* f();")
+
     def test_DoubleFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
             """
@@ -151,19 +164,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             }
             """,
             "char* f();")
-
-    def test_ConstCharPtrFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
-            """
-            const char* f() {
-                mock().actualCall("f");
-                if mock().hasReturnValue() {
-                    return mock().stringReturnValue();
-                }
-                return WRITEME;
-            }
-            """,
-            "const char* f();")
 
     @unittest.skip("NOTYET")
     def test_VoidFunctionOneArgument(self):
