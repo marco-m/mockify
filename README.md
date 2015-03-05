@@ -26,6 +26,14 @@ Mockify is written in Python and thanks to the excellent [pycparser][] parses
 the C code of the function prototype to mock and generates all the needed
 boilerplate :-)
 
+## Development status
+
+Already usable with basic functionalities. Most important missing parts:
+
+- support for function parameters
+- support for basic typedefs (eg size_t)
+
+
 ## Usage
 
 Mockify is designed to be used with any editor or IDE, or just from the shell.
@@ -52,6 +60,10 @@ will start to have linker errors for all the functions you need to mock.
 Copy the first unfound symbol from the linker, search for it (using your IDE,
 cscope, ctags, ...), go to the corresponding header file. Copy and paste the
 function declaration and pass it to mockify.
+
+The above steps can be automated within your editor or IDE. For CLion, you can
+use it as an "external tool" and pass it automatically the name of the header
+file and the copy and paste of the function declaration.
 
 Add the generated mock file to the build. Open the generated mock file, check
 and complete the mock boilerplate.
