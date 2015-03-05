@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4 -B
+#!/usr/bin/env python3 -B
 
 # Copyright (c) 2015, Marco Molteni.
 #
