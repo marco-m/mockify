@@ -1,35 +1,63 @@
 # Mockify (work in progress!)
 
-Generate complete boilerplate code for [CppUMock][] C/C++ mocks.
+Generate complete boilerplate code for [CppUTest][] C/C++ mocks.
 
-When writing mocks, the majority of the code is really boring boilerplate, for
-example to mock:
+When writing mocks, the majority of the code is just boring boilerplate. For
+example, to mock
 
-    void* malloc(size_t size)
+    int zoo_cat(int a)
 
 one has to write:
 
-    1    void* malloc(size_t size) {
-    2        mock().actualCall("malloc")
-    3            .withParameter("size", size);
+    1    int zoo_cat(int a) {
+    2        mock().actualCall("zoo_cat")
+    3            .withParameter("a", a);
     4        if mock().hasReturnValue() {
-    5            return mock().pointerReturnValue();
+    5            return mock().intReturnValue();
     6        }
-    7        return real_malloc(size);
+    7        return something(a);
     8    }
 
 where *everything* but line 7 is boilerplate. Multiply this for the tens of
-mocks needed also for the smallest unit test and the task becomes quickly boring
-and error-prone.
+mocks needed also for the smallest unit test and the task quickly becomes
+boring and error-prone.
 
 Mockify is written in Python and thanks to the excellent [pycparser][] parses
 the C code of the function prototype to mock and generates all the needed
 boilerplate :-)
 
+## Usage
+
+Mockify is designed to be used with any editor or IDE, or just from the shell.
+
+Assuming that function `zoo_cat()` is declared in header file `zoo.h`, calling:
+
+    mockify.py zoo "int zoo_cat(int a);"
+
+will generate mock file `zoo_mock.cpp`, containing the mock boilerplate for
+function `zoo_cat()`.
+
+Subsequent calls to mockify matching on the header file will append the new
+mock boilerplate to `zoo_mock.cpp`. For example
+
+    mockify.py zoo "int zoo_dog(int b);"
+
+will append the boilerplate mock for `zoo_dog()`.
+
+## Suggested workflow
+
+Bring a source file under unit test. Once the compilation is succesful, you
+will start to have linker errors for all the functions you need to mock.
+
+Copy the first unfound symbol from the linker, search for it (using your IDE,
+cscope, ctags, ...), go to the corresponding header file. Copy and paste the
+function declaration and pass it to mockify.
+
+Add the generated mock file to the build. Open the generated mock file, check
+and complete the mock boilerplate.
+
+Rinse and repeat :-)
 
 
-
-
-
-[CppUMock]: https://cpputest.github.io
+[CppUTest]: https://cpputest.github.io
 [pycparser]: https://github.com/eliben/pycparser
