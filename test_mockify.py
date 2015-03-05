@@ -165,7 +165,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "char* f();")
 
-    @unittest.skip("NOTYET")
     def test_VoidFunctionOneArgument(self):
         self.ExpectedMockFromProto(
             """
@@ -180,13 +179,13 @@ class BoilerPlateGeneration(unittest.TestCase):
     def test_VoidFunctionTwoArguments(self):
         self.ExpectedMockFromProto(
             """
-            void f(int i, int j) {
+            void f(int i, double j) {
                 mock().actualCall("f")
                     .withParameter("i", i)
                     .withParameter("j", j);
             }
             """,
-            "void f(int i, int j);")
+            "void f(int i, double j);")
 
 
 if __name__ == '__main__':

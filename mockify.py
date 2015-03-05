@@ -37,12 +37,12 @@ extern "C" {
 
 VOID_MOCK = '''
 {return_type} {function}({args}) {{
-    mock().actualCall("{function}");
+    mock().actualCall("{function}"){with_parameters}
 }}'''.lstrip("\n")
 
 NON_VOID_MOCK = '''
 {return_type} {function}({args}) {{
-    mock().actualCall("{function}");
+    mock().actualCall("{function}"){with_parameters}
     if mock().hasReturnValue() {{
         return mock().{return_value};
     }}
@@ -151,8 +151,7 @@ def generate_mock_boilerplate(prototype):
     if len(type_decl.quals) > 0:
         type_name = type_decl.quals[0] + " " + type_name
 
-    if func_decl.args:
-        func_decl.args.show()
+    args, with_parameters = generate_args(func_decl.args)
 
     return_values = {
         # All the return values supported by CppUMock.
@@ -173,12 +172,14 @@ def generate_mock_boilerplate(prototype):
         mock = VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
-            args="")
+            args=args,
+            with_parameters=with_parameters)
     elif type_name in return_values:
         mock = NON_VOID_MOCK.format(
             return_type=type_name,
             function=function_name,
-            args="",
+            args=args,
+            with_parameters=with_parameters,
             return_value=return_values[type_name])
     else:
         raise MockError("Internal error, cannot handle: {0} [{1}]".format(
@@ -196,11 +197,29 @@ def generate_mock_boilerplate(prototype):
     #
     # Output parameters:
     #
-    # void Foo(int *bar)
+    # void foo(int* bar)
     # {
     #     mock().actualCall("foo").
     #         withOutputParameter("bar", bar);
     # }
+
+
+def generate_args(param_list):
+        args = ''
+        with_parameters = ';'
+        if not param_list:
+            return args, with_parameters
+        #param_list.show()
+        #print(param_list.params)
+        decl = param_list.params[0]
+        param_name = decl.name
+        type_decl = decl.type
+        param_type = type_decl.type.names[0]
+        print(param_type, param_name)
+        args = '{0} {1}'.format(param_type, param_name)
+        with_parameters = \
+            '\n        .withParameter("{0}", {0});'.format(param_name)
+        return args, with_parameters
 
 
 if __name__ == "__main__":
