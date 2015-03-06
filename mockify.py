@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -B
+#!/usr/bin/env python3
 
 # Copyright (c) 2015, Marco Molteni.
 #
@@ -199,17 +199,33 @@ def generate_mock_boilerplate(prototype):
 def generate_args(param_list):
         if not param_list:
             return '', ''
-        #param_list.show()
-        #print(param_list.params)
-
         args = ''
         with_parameters = ''
         comma = ''
         for decl in param_list.params:
+            # Decl: k, [], [], []
+            #     TypeDecl: k, []
+            #         IdentifierType: ['int']
+            # Decl: i, [], [], []
+            #     PtrDecl: []
+            #         TypeDecl: i, []
+            #             IdentifierType: ['char']
+            decl.show()
             param_name = decl.name
-            type_decl = decl.type
-            param_type = type_decl.type.names[0]
-            #print(param_type, param_name)
+            if isinstance(decl.type, c_ast.TypeDecl):
+                type_decl = decl.type
+                identifier_type = type_decl.type
+                param_type = identifier_type.names[0]
+            elif isinstance(decl.type, c_ast.PtrDecl):
+                type_decl = decl.type.type
+                identifier_type = type_decl.type
+                param_type = identifier_type.names[0] + '*'
+            else:
+                raise MockError("Internal error parsing: " + param_list)
+
+            if len(type_decl.quals) > 0:
+                param_type = type_decl.quals[0] + " " + param_type
+
             args += '{comma}{param_type} {param_name}'.format(
                 comma=comma,
                 param_type=param_type,

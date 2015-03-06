@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -B
+#!/usr/bin/env python3
 
 # Copyright (c) 2015, Marco Molteni.
 #
@@ -203,7 +203,6 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "char* f(int i, double j, int k);")
 
-    @unittest.skip("NOTYET")
     def test_ConstCharFunctionTwoComplexArguments(self):
         self.ExpectedMockFromProto(
             """
