@@ -165,7 +165,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "char* f();")
 
-    def test_VoidFunctionOneArgument(self):
+    def test_VoidFunctionOneSimpleArgument(self):
         self.ExpectedMockFromProto(
             """
             void f(int i) {
@@ -175,18 +175,33 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void f(int i);")
 
-    @unittest.skip("NOTYET")
-    def test_VoidFunctionTwoArguments(self):
+    def test_VoidFunctionThreeSimpleArguments(self):
         self.ExpectedMockFromProto(
             """
-            void f(int i, double j) {
+            void f(int i, double j, int k) {
                 mock().actualCall("f")
                     .withParameter("i", i)
-                    .withParameter("j", j);
+                    .withParameter("j", j)
+                    .withParameter("k", k);
             }
             """,
-            "void f(int i, double j);")
+            "void f(int i, double j, int k);")
 
+    @unittest.skip("NOTYET")
+    def test_ConstCharFunctionTwoComplexArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            const char* f(char* i, const char* m) {
+                mock().actualCall("f")
+                    .withParameter("i", i)
+                    .withParameter("m", m);
+                if mock().hasReturnValue() {
+                    return mock().stringReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "const char* f(char* i, const char* m);")
 
 if __name__ == '__main__':
     unittest.main()

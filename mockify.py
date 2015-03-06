@@ -37,12 +37,12 @@ extern "C" {
 
 VOID_MOCK = '''
 {return_type} {function}({args}) {{
-    mock().actualCall("{function}"){with_parameters}
+    mock().actualCall("{function}"){with_parameters};
 }}'''.lstrip("\n")
 
 NON_VOID_MOCK = '''
 {return_type} {function}({args}) {{
-    mock().actualCall("{function}"){with_parameters}
+    mock().actualCall("{function}"){with_parameters};
     if mock().hasReturnValue() {{
         return mock().{return_value};
     }}
@@ -187,14 +187,6 @@ def generate_mock_boilerplate(prototype):
 
     return mock
 
-    # "withParameters" can only use int, double, const char* or const void*
-    # void f(int i, const char* p); =>
-    # void f(int i, const char* p) {
-    #     mock().actualCall("f")
-    #         .withParameter("i", i)
-    #         .withParameter("p", p);
-    # }
-    #
     # Output parameters:
     #
     # void foo(int* bar)
@@ -205,20 +197,27 @@ def generate_mock_boilerplate(prototype):
 
 
 def generate_args(param_list):
-        args = ''
-        with_parameters = ';'
         if not param_list:
-            return args, with_parameters
+            return '', ''
         #param_list.show()
         #print(param_list.params)
-        decl = param_list.params[0]
-        param_name = decl.name
-        type_decl = decl.type
-        param_type = type_decl.type.names[0]
-        print(param_type, param_name)
-        args = '{0} {1}'.format(param_type, param_name)
-        with_parameters = \
-            '\n        .withParameter("{0}", {0});'.format(param_name)
+
+        args = ''
+        with_parameters = ''
+        comma = ''
+        for decl in param_list.params:
+            param_name = decl.name
+            type_decl = decl.type
+            param_type = type_decl.type.names[0]
+            #print(param_type, param_name)
+            args += '{comma}{param_type} {param_name}'.format(
+                comma=comma,
+                param_type=param_type,
+                param_name=param_name)
+            with_parameters += \
+                '\n        .withParameter("{0}", {0})'.format(param_name)
+            comma = ', '
+
         return args, with_parameters
 
 
