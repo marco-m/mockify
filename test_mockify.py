@@ -187,6 +187,22 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "void f(int i, double j, int k);")
 
+    def test_CharPtrFunctionThreeSimpleArguments(self):
+        self.ExpectedMockFromProto(
+            """
+            char* f(int i, double j, int k) {
+                mock().actualCall("f")
+                    .withParameter("i", i)
+                    .withParameter("j", j)
+                    .withParameter("k", k);
+                if mock().hasReturnValue() {
+                    return mock().pointerReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "char* f(int i, double j, int k);")
+
     @unittest.skip("NOTYET")
     def test_ConstCharFunctionTwoComplexArguments(self):
         self.ExpectedMockFromProto(
