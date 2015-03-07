@@ -218,5 +218,43 @@ class BoilerPlateGeneration(unittest.TestCase):
             """,
             "const char* f(char* i, const char* m);")
 
+    # Here I get from pycparser:
+    #
+    #   Parse error: ':1:7: before: f' with input: 'foo_t f(int i);'
+    #
+    # which makes me think pycparser might not be the right tool for what
+    # I want to do...
+    #
+    # Compare with the very informative message I get from clang:
+    #
+    #   clang foo.c
+    #   foo.c:1:1: error: unknown type name 'foo_t'
+    #   foo_t f(int i);
+    #   ^
+    #
+    # This is exactly what I want to know, the _type_ of the error:
+    #
+    #     unknown type name 'foo_t'
+    #
+    # with that, I can re-run the parser with a fake input:
+    #
+    #     typedef int foo_t
+    #     foo_t f(int i);
+    #
+    # that would be enough to generate the mock boilerplate!
+    # Clearly the typedef could be completely wrong, but in any case the
+    # boilerplate would be there for the user to verify and edit, as opposed
+    # to just a dumb error message and no boilerplate at all...
+    #
+    def test_TypedefFunctionOneArgument(self):
+        self.ExpectedMockFromProto(
+            """
+            foo_t f(int i) {
+                mock().actualCall("f")
+                    .withParameter("i", i);
+            }
+            """,
+            "foo_t f(int i);")
+
 if __name__ == '__main__':
     unittest.main()

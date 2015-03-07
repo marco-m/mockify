@@ -102,9 +102,9 @@ def generate_mock_boilerplate(prototype):
     parser = c_parser.CParser()
     try:
         ast = parser.parse(prototype)
-    except c_parser.ParseError:
-        e = sys.exc_info()[1]
-        raise MockError("Parse error:" + str(e))
+    except c_parser.ParseError as e:
+        raise MockError("Parse error: '{0}' with input: '{1}'".format(
+            str(e), prototype))
     decl = ast.ext[-1]
     if not isinstance(decl, c_ast.Decl):
         raise MockError("Not a valid declaration: " + prototype)
