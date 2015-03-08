@@ -151,7 +151,7 @@ def generate_mock_boilerplate(prototype):
     if len(type_decl.quals) > 0:
         type_name = type_decl.quals[0] + " " + type_name
 
-    args, with_parameters = generate_args(func_decl.args)
+    args, with_parameters = generate_args(prototype, func_decl.args)
 
     return_values = {
         # All the return values supported by CppUMock.
@@ -196,7 +196,7 @@ def generate_mock_boilerplate(prototype):
     # }
 
 
-def generate_args(param_list):
+def generate_args(prototype, param_list):
         if not param_list:
             return '', ''
         args = ''
@@ -221,8 +221,18 @@ def generate_args(param_list):
                 identifier_type = type_decl.type
                 param_type = identifier_type.names[0] + '*'
             else:
-                raise MockError("Internal error parsing: " + param_list)
+                raise MockError("Internal error parsing arguments in: '{0}'"
+                                .format(prototype))
 
+            if not param_name:
+                # Unnamed void argument: "f(void);" ?
+                if param_type == 'void':
+                    # FIXME Not 100% robust if other arguments are present
+                    return '', ''
+                else:
+                    raise MockError("Cannot mock unnamed arguments. "
+                                    "Please rewrite the prototype: '{0}'"
+                                    .format(prototype))
             if len(type_decl.quals) > 0:
                 param_type = type_decl.quals[0] + " " + param_type
 

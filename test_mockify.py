@@ -31,13 +31,17 @@ class BoilerPlateGeneration(unittest.TestCase):
         self.assertRaises(MockError, generate_mock_boilerplate, "void f()")
 
     def test_RefuseStaticFunctions(self):
-        self.assertRaises(MockError, generate_mock_boilerplate, "static void f();")
+        self.assertRaises(MockError, generate_mock_boilerplate,
+                          "static void f();")
 
     def test_RefuseDeclarationsThatAreNotFunctions(self):
         self.assertRaises(MockError, generate_mock_boilerplate, "int i;")
 
     def test_ParseError(self):
         self.assertRaises(MockError, generate_mock_boilerplate, "foo")
+
+    def test_FunctionNonVoidUnnamedArgument(self):
+        self.assertRaises(MockError, generate_mock_boilerplate, "void f(int);")
 
     def test_IntFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
@@ -51,6 +55,21 @@ class BoilerPlateGeneration(unittest.TestCase):
             }
             """,
             "int f();")
+
+    # We remove the "void" argument because the mock is written in C++,
+    # not in C.
+    def test_FunctionVoidUnnamedArgument(self):
+        self.ExpectedMockFromProto(
+            """
+            int f() {
+                mock().actualCall("f");
+                if mock().hasReturnValue() {
+                    return mock().intReturnValue();
+                }
+                return WRITEME;
+            }
+            """,
+            "int f(void);")
 
     def test_UnsignedIntFunctionZeroArguments(self):
         self.ExpectedMockFromProto(
@@ -238,7 +257,7 @@ class BoilerPlateGeneration(unittest.TestCase):
     #
     # with that, I can re-run the parser with a fake input:
     #
-    #     typedef int foo_t
+    #     typedef int foo_t;
     #     foo_t f(int i);
     #
     # that would be enough to generate the mock boilerplate!
@@ -246,6 +265,7 @@ class BoilerPlateGeneration(unittest.TestCase):
     # boilerplate would be there for the user to verify and edit, as opposed
     # to just a dumb error message and no boilerplate at all...
     #
+    @unittest.skip("NOTYET")
     def test_TypedefFunctionOneArgument(self):
         self.ExpectedMockFromProto(
             """
