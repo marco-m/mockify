@@ -28,11 +28,10 @@ boilerplate :-)
 
 ## Development status
 
-Already usable with basic functionalities, including any number of simple
-function arguments. Most important missing parts:
+Already usable with basic functionalities. Most important missing parts:
 
-- support for complex function arguments
-- support for basic typedefs (eg size_t)
+- support for basic typedefs (eg size_t) both as function type and as function
+argument
 - support for output parameters (eg void foo(int* bar))
 
 ## Usage
