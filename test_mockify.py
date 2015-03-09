@@ -22,7 +22,10 @@ import textwrap
 
 
 class BoilerPlateGeneration(unittest.TestCase):
-    def ExpectedMockFromProto(self, mock_function, prototype):
+    def foo(self):
+        pass
+
+    def expectedMockFromProto(self, mock_function, prototype):
         self.assertEqual(textwrap.dedent(mock_function).strip("\n"),
                          generate_mock_boilerplate(prototype))
 
@@ -44,7 +47,7 @@ class BoilerPlateGeneration(unittest.TestCase):
         self.assertRaises(MockError, generate_mock_boilerplate, "void f(int);")
 
     def test_IntFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             int f() {
                 mock().actualCall("f");
@@ -59,7 +62,7 @@ class BoilerPlateGeneration(unittest.TestCase):
     # We remove the "void" argument because the mock is written in C++,
     # not in C.
     def test_FunctionVoidUnnamedArgument(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             int f() {
                 mock().actualCall("f");
@@ -72,7 +75,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "int f(void);")
 
     def test_UnsignedIntFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             unsigned int f() {
                 mock().actualCall("f");
@@ -85,7 +88,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "unsigned int f();")
 
     def test_LongIntFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             long int f() {
                 mock().actualCall("f");
@@ -98,7 +101,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "long int f();")
 
     def test_UnsignedLongIntFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             unsigned long int f() {
                 mock().actualCall("f");
@@ -111,7 +114,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "unsigned long int f();")
 
     def test_ConstCharPtrFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             const char* f() {
                 mock().actualCall("f");
@@ -124,7 +127,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "const char* f();")
 
     def test_DoubleFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             double f() {
                 mock().actualCall("f");
@@ -137,7 +140,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "double f();")
 
     def test_VoidFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             void f() {
                 mock().actualCall("f");
@@ -146,7 +149,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "void f();")
 
     def test_VoidPtrFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             void* f() {
                 mock().actualCall("f");
@@ -159,7 +162,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "void* f();")
 
     def test_ConstVoidPtrFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             const void* f() {
                 mock().actualCall("f");
@@ -172,7 +175,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "const void* f();")
 
     def test_CharPtrFunctionZeroArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             char* f() {
                 mock().actualCall("f");
@@ -185,7 +188,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "char* f();")
 
     def test_VoidFunctionOneSimpleArgument(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             void f(int i) {
                 mock().actualCall("f")
@@ -195,7 +198,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "void f(int i);")
 
     def test_VoidFunctionThreeSimpleArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             void f(int i, double j, int k) {
                 mock().actualCall("f")
@@ -207,7 +210,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "void f(int i, double j, int k);")
 
     def test_CharPtrFunctionThreeSimpleArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             char* f(int i, double j, int k) {
                 mock().actualCall("f")
@@ -223,7 +226,7 @@ class BoilerPlateGeneration(unittest.TestCase):
             "char* f(int i, double j, int k);")
 
     def test_ConstCharFunctionTwoComplexArguments(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             const char* f(char* i, const char* m) {
                 mock().actualCall("f")
@@ -267,11 +270,15 @@ class BoilerPlateGeneration(unittest.TestCase):
     #
     @unittest.skip("NOTYET")
     def test_TypedefFunctionOneArgument(self):
-        self.ExpectedMockFromProto(
+        self.expectedMockFromProto(
             """
             foo_t f(int i) {
                 mock().actualCall("f")
                     .withParameter("i", i);
+                if mock().hasReturnValue() {
+                    return mock().intchroReturnValue();
+                }
+                return WRITEME;
             }
             """,
             "foo_t f(int i);")
