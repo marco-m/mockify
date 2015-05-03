@@ -20,14 +20,23 @@ from mockify import MockError
 import unittest
 import textwrap
 
+_count = 0
 
 class BoilerPlateGeneration(unittest.TestCase):
-    def foo(self):
-        pass
 
     def expectedMockFromProto(self, mock_function, prototype):
-        self.assertEqual(textwrap.dedent(mock_function).strip("\n"),
-                         generate_mock_boilerplate(prototype))
+        global _count
+        mock = textwrap.dedent(mock_function).strip("\n")
+        f = open("mocks.cpp", "a")
+        f.write('\nnamespace f{count} {{\n'.format(count=_count))
+        _count += 1
+        f.write(mock + '\n')
+        f.write('}\n')
+        f.close()
+
+    # def expectedMockFromProto(self, mock_function, prototype):
+    #     self.assertEqual(textwrap.dedent(mock_function).strip("\n"),
+    #                      generate_mock_boilerplate(prototype))
 
     def test_RefuseIncompleteInput(self):
         # Missing ``;`` at end of ``void f()`` is incomplete...
