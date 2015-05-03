@@ -1,5 +1,9 @@
 # Mockify (work in progress!)
 
+
+[![Build Status](https://travis-ci.org/marco-m/mockify.svg?branch=master
+)](https://travis-ci.org/marco-m/mockify)
+
 Generate complete boilerplate code for [CppUTest][] C/C++ mocks.
 
 When writing mocks, the majority of the code is just boring boilerplate. For
